@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Document</title>
+    <link rel="stylesheet" type="text/css" href="../design/delete.css">
+    <link href="https://fonts.googleapis.com/css?family=Quantico" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div id="header">
+            <h2>DELETE Document</h2>
+        </div>
+        <div id="main">
+            <div id="delete_form">
+                <select id="delete_select">
+                    <option>Image</option>
+                    <option>Document</option>
+                    <option>PPT</option>
+                    <option>PDF</option>
+                </select>
+                <button id="search_button">Search</button>
+                <ul id="display_result"></ul>
+            </div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $("#search_button").click(function() {
+            var key = $("#delete_select").val();
+            $.ajax({
+                url:"update.php",
+                method:"POST",
+                data:{key:key},
+                beforeSend: function() {
+                    $("#search_button").text("Loading...");
+                    $("#display_result").html('<img src="../Images/Facebook.gif" alt="loading.." width="5%" style="display:block;margin:auto;"></img>');
+                },
+                success: function(data) {
+                    setTimeout(function(){
+                        $("#display_result").html(data);
+                        $("#search_button").text("Search");
+                    },2000);
+                },
+                error: function (error) {
+                    alert(error.status);
+                }
+            });
+        });
+    });
+</script>
+</html>

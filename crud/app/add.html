@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Document</title>
+    <link rel="stylesheet" type="text/css" href="../design/add.css">
+    <link href="https://fonts.googleapis.com/css?family=Quantico" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div id="header">
+            <h2>Add Document</h2>
+        </div>
+        <div id="main">
+            <div id="add_form">
+                <h5 id="notice">Added</h5>
+                <input type="text" name="name" id="name" placeholder="Title">
+                <input type="text" name="author" id="author" placeholder="Author Name">
+                <input type="text" name="subject" id="subject" placeholder="Subject">
+                <select name="type" id="type">
+                    <option>Image</option>
+                    <option>Document</option>
+                    <option>PPT</option>
+                    <option>PDF</option>
+                </select>
+                <!--<input type="text" name="publish" id="publish" placeholder="Publish Date">-->
+                <input type="file" name="file" id="file">
+                <div id="progressbar">
+                    <div id="myprogress"></div>
+                </div>
+                <span id="uploading">0%</span>
+                <span id="document_link"></span>
+                <button id="add_button">Add Document</button>
+            </div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript">
+    $(document).ready(function(){
+        var form_data;
+        $("#file").on('change',function(){
+            var name = document.getElementById("file").files[0].name;
+            var form_data = new FormData();
+            var ext = name.split('.').pop().toLowerCase();
+            var oFReader = new FileReader();
+            oFReader.readAsDataURL(document.getElementById("file").files[0]);
+            var f = document.getElementById("file").files[0];
+            form_data.append("file", document.getElementById('file').files[0]);
+            $.ajax ({
+                url:"add_document.php",
+                method:"POST",
+                data:form_data,
+                contentType:false,
+                processData:false,
+                beforeSend: function() {
+                    $("#uploading").show();
+                },
+                success: function(data) {
+                    var progress = function(sec) {
+                        setTimeout(function(){
+                            sec += 1;
+                            $("#uploading").text(sec+"%");
+                            $("#progressbar").show();
+                            $("#myprogress").css('width', sec+'%');
+                            if(sec<100) {
+                                progress(sec);
+                            }
+                            else {
+                                $("#progressbar").hide();
+                                $("#uploading").hide();
+                            }
+                        },50);
+                    }
+                    progress(0);
+                    $("#document_link").text(data);
+                },
+                error: function (error) {
+                    alert(error.status);
+                }
+            });
+        });
+        $("#add_button").click(function(){
+            var name = $("#name").val();
+            var author = $("#author").val();
+            var subject = $("#subject").val();
+            var type = $("#type option:selected").val();
+            var link = $("#document_link").text();
+            $.ajax({
+                url:"add.php",
+                method:"POST",
+                data:{add:"true",name:name,author:author,subject:subject,type:type,link:link},
+                dataType:"json",
+                beforeSend: function() {
+                    $("#add_button").html("Loading...");
+                },
+                success:function(data) {
+                    setTimeout(function(){
+                        $("#add_button").html("Add Document");
+                        $("#notice").show();
+                        $("#notice").html("Successfully Document has been uploaded..");
+                        $("#progressbar").hide();
+                        $("#uploading").hide();
+                    },2000);
+                },
+                error: function (error) {
+                    alert(error.status);
+                }
+            });
+        });
+    });
+</script>
+</html>
